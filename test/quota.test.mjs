@@ -1,6 +1,7 @@
 import assert from "node:assert/strict"
 import test from "node:test"
 import { buildSignedHeaders, fetchSubscriptionStats, formatTeamQuota } from "../src/quota.mjs"
+import { FALLBACK_CHAT_MODELS, classifyModel, fetchLiveModelIds, runtimeEntry } from "../src/models.mjs"
 import { BailianTeamTokenPlanPlugin } from "../index.mjs"
 
 test("buildSignedHeaders builds ACS3-HMAC-SHA256 Authorization header", async () => {
@@ -62,7 +63,28 @@ test("fetchSubscriptionStats parses Data on Success=true and throws on API error
   )
 })
 
-test("BailianTeamTokenPlanPlugin registers config, loader, and usage error when AK/SK missing", async () => {
+test("fetchLiveModelIds deduplicates IDs and classifies chat vs media models", async () => {
+  const ids = await fetchLiveModelIds("sk-sp-demo", {
+    fetchImpl: async () => ({
+      ok: true,
+      json: async () => ({
+        data: [
+          { id: "glm-5.3" },
+          { id: "deepseek-v4.1-flash-1017" },
+          { id: "glm-5.3" },
+          { id: "qwen-image-3.0-pro" },
+        ],
+      }),
+    }),
+  })
+  assert.deepEqual(ids, ["glm-5.3", "deepseek-v4.1-flash-1017", "qwen-image-3.0-pro"])
+  assert.equal(classifyModel("glm-5.3").isChat, true)
+  assert.equal(classifyModel("qwen-image-3.0-pro").isImageGen, true)
+  assert.equal(runtimeEntry("glm-5.3").capabilities.output.text, true)
+  assert.equal(runtimeEntry("qwen-image-3.0-pro").capabilities.output.image, true)
+})
+
+test("BailianTeamTokenPlanPlugin registers full fallback catalog, provider.models fallback, loader, and usage error", async () => {
   const prevAk = process.env.ALIBABA_CLOUD_ACCESS_KEY_ID
   const prevSk = process.env.ALIBABA_CLOUD_ACCESS_KEY_SECRET
   delete process.env.ALIBABA_CLOUD_ACCESS_KEY_ID
@@ -72,7 +94,13 @@ test("BailianTeamTokenPlanPlugin registers config, loader, and usage error when 
     const cfg = {}
     await hooks.config(cfg)
     assert.ok(cfg.provider["bailian-token-plan"].models["deepseek-v4.1-flash-1017"])
+    assert.ok(cfg.provider["bailian-token-plan"].models["glm-5.3"])
     assert.ok(cfg.provider["bailian-token-plan"].models["qwen4-max"])
+    assert.equal(Object.keys(cfg.provider["bailian-token-plan"].models).length, FALLBACK_CHAT_MODELS.length)
+
+    // Without auth, provider.models returns provider.models untouched
+    const staticModels = { demo: { id: "demo" } }
+    assert.equal(await hooks.provider.models({ models: staticModels }, {}), staticModels)
 
     const loaderRes = await hooks.auth.loader(async () => ({ type: "api", key: "sk-sp-demo" }))
     assert.equal(loaderRes.baseURL, "https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1")
