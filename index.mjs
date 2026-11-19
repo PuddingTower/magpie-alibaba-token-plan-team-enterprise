@@ -9,7 +9,7 @@ export const BailianTeamTokenPlanPlugin = async (_input, options = {}) => {
     config: async (cfg) => {
       cfg.provider ??= {}
       cfg.provider[PROVIDER] ??= {
-        name: "Bailian Token Plan Team",
+        name: "Alibaba Token Plan Team/Enterprise",
         npm: "@ai-sdk/openai-compatible",
         api: baseURL,
         models: Object.fromEntries(FALLBACK_CHAT_MODELS.map((id) => [id, configEntry(id)])),
