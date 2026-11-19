@@ -1,7 +1,7 @@
 {
   "name": "magpie-bailian-team-token-plan",
   "version": "0.2.0",
-  "description": "Magpie plugin for Alibaba Cloud Bailian Token Plan Team Edition (阿里云百炼 Token Plan 团队版): dynamic live model catalog (/v1/models) + captcha-free RAM AccessKey quota tracking (GetSubscriptionStats) + sk-sp API Key inference.",
+  "description": "Alibaba Token Plan Team / Enterprise Edition plugin for Magpie (阿里云百炼 Token Plan 团队版/企业版): dynamic live model catalog (/v1/models) + captcha-free RAM AccessKey quota tracking (GetSubscriptionStats) + sk-sp API Key inference.",
   "type": "module",
   "main": "./index.mjs",
   "exports": {
@@ -24,17 +24,23 @@
     "aliyun",
     "alibabacloud",
     "token-plan",
+    "token-plan-team",
     "team-edition",
+    "enterprise",
+    "enterprise-edition",
+    "alibaba",
+    "alibaba-cloud",
+    "alibaba-token-plan",
     "quota"
   ],
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/PuddingTower/magpie-bailian-team-token-plan.git"
+    "url": "git+https://github.com/PuddingTower/magpie-alibaba-token-plan-team-enterprise.git"
   },
-  "homepage": "https://github.com/PuddingTower/magpie-bailian-team-token-plan#readme",
+  "homepage": "https://github.com/PuddingTower/magpie-alibaba-token-plan-team-enterprise#readme",
   "bugs": {
-    "url": "https://github.com/PuddingTower/magpie-bailian-team-token-plan/issues"
+    "url": "https://github.com/PuddingTower/magpie-alibaba-token-plan-team-enterprise/issues"
   },
   "engines": {
     "node": ">=20"
